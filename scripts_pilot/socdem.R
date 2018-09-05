@@ -12,7 +12,7 @@ dat <- cbind(participants[,vars])
 ind_s1 <- which(participants$exp == 1)
 ind_s2 <- which(participants$exp == 2)
 
-tab <- rbind(c("", "", "Study 1", "", "Study 2"),
+tab <- rbind(c("", "", "Pilot study 1", "", "Pilot study 2"),
              #c("", "", "", "", "", "", ""),
              c("N", "", paste("", as.character(length(ind_s1)), sep=""), "", paste("", as.character(length(ind_s2)), sep="")))
 
@@ -93,7 +93,7 @@ tab[,2] <- labels_new
 xtab <- xtable(tab,
                type="latex",
                label=paste("tab:pilot_socdem"),
-               caption=paste("Socio-demographic information (pilot studies)."),
+               caption=paste("Sociodemographic information (pilot studies 1 and 2)."),
                align=c("llllll"),
                #align=c("lp{1in} ", rep("rp{1in} ", ncol(tab2)))
 )
@@ -110,7 +110,7 @@ output <- sub("\\centering", "\\centering \n\\renewcommand{\\arraystretch}{1.3}"
 
 output <- sub("\\hline\n  \\hline\n", "\\hline\n", output, fixed=T)
 
-output <- sub("&  & Study 1 &  & Study 2 \\\\", "&  & Study 1 &  & Study 2 \\\\ \\cline{3-3} \\cline{5-5}", output, fixed=T)
+output <- sub("&  & Pilot study 1 &  & Pilot study 2 \\\\", "&  & Pilot study 1 &  & Pilot study 2 \\\\ \\cline{3-3} \\cline{5-5}", output, fixed=T)
 
 
 output <- gsub("\\begin{table}", "\\begin{table*}", output, fixed=T)

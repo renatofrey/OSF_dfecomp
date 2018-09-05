@@ -77,7 +77,7 @@ tab[tab_cred] <- paste("\\textbf{", tab[tab_cred], "}", sep="")
 
 
 if (sel_model == "glmulti") capt <- "Multi-model inference results"
-if (sel_model == "stan_glm") capt <- "Bayesian regression analyses (pilot studies)."
+if (sel_model == "stan_glm") capt <- "Bayesian regression analyses (pilot studies 1 and 2)."
 if (sel_model == "lm") capt <- "Ordinary-least-squares results"
 
 xtab <- xtable(tab,

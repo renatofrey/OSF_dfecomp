@@ -1,35 +1,48 @@
 ### This script runs the simulation analysis for the propotions of H-choices
 ### (c) Renato Frey
 
-pdf(file="../output/main/simulation.pdf", width=10)
-par(mfrow=c(2,2))
+pdf(file="../output/main/simulation.pdf", height=5, width=10)
+par(mfrow=c(1,3))
+
+envs <- c(0, .4, .2)
+
+#sensitivities <- c(1,.85,.7)
+sensitivities <- c(1,.9,.8)
+
+n_samples <- seq(1, 10, by=1)
+
+n_exp <- 1000
+n_part <- 30
+n_sims <- n_exp * n_part
+
+# prepare empty lists
+l1 <- list()
+l1[paste("ss=", n_samples, sep="")] <- NA
+l2 <- list()
+l2[paste("sens=", sensitivities, sep="")] <- list(l1)
+hist_H <- list()
+hist_H[paste("p_rare=", envs, sep="")] <- list(l2)
 
 p_ind <- 1
-for (p_rare in c(0, .2, .15, .1)) {
+
+for (p_rare in envs) {
   if (p_rare == 0) df <- read.csv(file="../data/main/dps_p00.csv", check.names=F)
+  if (p_rare == 0.4) df <- read.csv(file="../data/main/dps_p40.csv", check.names=F)
   if (p_rare == 0.2) df <- read.csv(file="../data/main/dps_p20.csv", check.names=F)
-  if (p_rare == 0.15) df <- read.csv(file="../data/main/dps_p15.csv", check.names=F)
-  if (p_rare == 0.1) df <- read.csv(file="../data/main/dps_p10.csv", check.names=F)
+
   
   set.seed(1234)
   
-  n_exp <- 1000
-  n_part <- 30
-  n_sims <- n_exp * n_part
-  
-  n_samples <- seq(1, 10, by=1)
   n_gambles <- ncol(df) / 2
-  
   
   if (!exists("p_ind")) p_ind <- ""
   
-  sensitivities <- c(1,.85,.7)
   #cols <- heat.colors(length(sensitivities))
   #cols <- c("red", adjustcolor("red", alpha.f=.75), adjustcolor("red", alpha.f=.5))
   cols <- viridis::viridis(10)[c(8,6,4)]
   
   chances <- list()
-  
+
   for (s in 1:length(sensitivities)) {
     
     sens <- sensitivities[s]
@@ -39,11 +52,11 @@ for (p_rare in c(0, .2, .15, .1)) {
     sim_HLdiff <- matrix(NA, ncol=n_gambles, nrow=n_sims)
     
     for (n in n_samples) {
-      print(paste(p_rare, sens, n))
+      print(paste("p_rare=", p_rare, " sens=", sens, " n=",n, sep=""))
       for (i in 1:n_gambles) {
         for (sim in 1:n_sims) {
-          outA <- df[sample(1:100, n, replace=T), paste(i, "a", sep="")]
-          outB <- df[sample(1:100, n, replace=T), paste(i, "b", sep="")]
+          outA <- df[sample(1:1000, n, replace=T), paste(i, "H", sep="")]
+          outB <- df[sample(1:1000, n, replace=T), paste(i, "L", sep="")]
           meanA <- mean(outA)
           meanB <- mean(outB)
           HL_diff <- round(meanA - meanB, 2)
@@ -55,6 +68,8 @@ for (p_rare in c(0, .2, .15, .1)) {
           sim_HLdiff[sim, i] <- HL_diff
         }
       }
+      
+      hist_H[[paste("p_rare=",p_rare,sep="")]][[paste("sens=",sens,sep="")]][[paste("ss=",n,sep="")]] <- sim_choice
       
       ind_exp <- rep(1:n_exp, each=n_part)
       curr_chances <- aggregate(sim_choice, by=list(ind_exp), mean, na.rm=T)[,2:(n_gambles+1)]
@@ -68,13 +83,12 @@ for (p_rare in c(0, .2, .15, .1)) {
       
       if (s == 1) {
         
-        if (p_rare == 0) p_title <- "Kind"
-        if (p_rare == 0.2) p_title <- "Mildly Wicked" 
-        if (p_rare == 0.15) p_title <- "Moderately Wicked"
-        if (p_rare == 0.10) p_title <- "Extremely Wicked" 
+        if (p_rare == 0.0) p_title <- "Kind environment:\np(rare) = 0"
+        if (p_rare == 0.4) p_title <- "Moderately wicked environment:\np(rare) = 0.4"
+        if (p_rare == 0.2) p_title <- "Extremely wicked environment:\np(rare) = 0.2"
         
-        plot(1:length(n_samples), type="n", col="blue", xlab="Number of samples", ylab="Chance of choosing H", xaxt="n", ylim=c(0,1), las=1, main=p_title)
-        axis(1, at=1:n, n_samples*2, cex.axis=.8)
+        plot(1:length(n_samples), type="n", col="blue", xlab="Number of samples", ylab="Probability of choosing H", xaxt="n", ylim=c(0,1), las=1, main=p_title)
+        axis(1, at=1:n, n_samples*2, cex.axis=1)
         abline(h=.5, lty=3)
       }
       
@@ -83,12 +97,12 @@ for (p_rare in c(0, .2, .15, .1)) {
       
       p_means <- as.numeric(lapply(gambles_avg, mean))
       
-      p_cil <- as.numeric(lapply(gambles_avg, min))
-      p_ciu <- as.numeric(lapply(gambles_avg, max))
+      #p_cil <- as.numeric(lapply(gambles_avg, min))
+      #p_ciu <- as.numeric(lapply(gambles_avg, max))
       
-      #p_sds <- as.numeric(lapply(gambles_avg, sd))
-      #p_cil <- p_means - p_min
-      #p_ciu <- p_means + p_max
+      p_sds <- as.numeric(lapply(gambles_avg, sd))
+      p_cil <- p_means - p_sds
+      p_ciu <- p_means + p_sds
       
       points(p_means, type="b", col=cols[s], lwd=3)
       points(p_ciu, type="l", col=cols[s], lty=3, pch=18, cex=.5)
@@ -101,5 +115,7 @@ for (p_rare in c(0, .2, .15, .1)) {
 
   p_ind <- p_ind + 1
 }
+
+save(hist_H, file="../data/main/sim_choices.Rdata")
 
 dev.off()
