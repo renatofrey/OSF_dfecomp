@@ -18,7 +18,7 @@ summary(participants$qual_focused)
 
 
 
-pdf("../output/pilot/pilot3.pdf", width=10)
+pdf("../output/pilot/pilot3.pdf", width=5)
 
 library(viridis)
 key <- seq(0, 1, by=0.025)
@@ -82,7 +82,7 @@ points(x2$x, ext, type="l", lty=2)
 
 
 x <- as.character(seq(0.5, 1, by=.1))
-legend("bottomright", title="Choice sensitivity", title.adj=.5, x, pch=16, col=cols[x], box.lty=0, bg="transparent", horiz=T)
+legend("bottom", title="Choice sensitivity", title.adj=.5, x, pch=16, col=cols[x], box.lty=0, bg="transparent", horiz=T)
 
 legend("topleft", paste("r = ", round(c, 2), " (N = ", nrow(participants), ")", sep=""), box.lty=0)
 
