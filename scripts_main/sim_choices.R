@@ -1,13 +1,13 @@
 ### This script runs the simulation analysis for the propotions of H-choices
 ### (c) Renato Frey
 
-pdf(file="../output/main/simulation.pdf", height=5, width=10)
+pdf(file="../output/main/simulation.pdf", height=4, width=10)
 par(mfrow=c(1,3))
 
 envs <- c(0, .4, .2)
 
 #sensitivities <- c(1,.85,.7)
-sensitivities <- c(1,.9,.8)
+sensitivities <- c(1,.9,.8,.7,.6,.5)
 
 n_samples <- seq(1, 10, by=1)
 
@@ -22,6 +22,11 @@ l2 <- list()
 l2[paste("sens=", sensitivities, sep="")] <- list(l1)
 hist_H <- list()
 hist_H[paste("p_rare=", envs, sep="")] <- list(l2)
+
+tmp_list <- as.data.frame(matrix(NA, nrow=length(n_samples), ncol=length(envs)))
+names(tmp_list) <- paste("p", envs, sep="")
+mean_H <- list()
+mean_H[paste("sens_", sensitivities, sep="")] <- list(tmp_list)
 
 p_ind <- 1
 
@@ -96,6 +101,7 @@ for (p_rare in envs) {
       gambles_avg <- lapply(curr_sens, function(x) {apply(x, 1, mean)}) # average chance across all 8 gambles
       
       p_means <- as.numeric(lapply(gambles_avg, mean))
+      mean_H[[paste("sens_",sens, sep="")]][,paste("p",p_rare,sep="")] <- p_means
       
       #p_cil <- as.numeric(lapply(gambles_avg, min))
       #p_ciu <- as.numeric(lapply(gambles_avg, max))
@@ -104,9 +110,13 @@ for (p_rare in envs) {
       p_cil <- p_means - p_sds
       p_ciu <- p_means + p_sds
       
-      points(p_means, type="b", col=cols[s], lwd=3)
-      points(p_ciu, type="l", col=cols[s], lty=3, pch=18, cex=.5)
-      points(p_cil, type="l", col=cols[s], lty=3, pch=18, cex=.5)
+      if (is.element(sens, c(1,.9,.8))) {
+        
+        points(p_means, type="b", col=cols[s], lwd=3)
+        points(p_ciu, type="l", col=cols[s], lty=3, pch=18, cex=.5)
+        points(p_cil, type="l", col=cols[s], lty=3, pch=18, cex=.5)
+        
+      }
       
     }
   }
@@ -116,6 +126,6 @@ for (p_rare in envs) {
   p_ind <- p_ind + 1
 }
 
-save(hist_H, file="../data/main/sim_choices.Rdata")
+save(hist_H, mean_H, file="../objects/main/sim_choices.Rdata")
 
 dev.off()
